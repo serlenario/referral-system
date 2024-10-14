@@ -1,0 +1,298 @@
+basePath: /
+definitions:
+  controllers.CreateReferralRequest:
+    properties:
+      expiry:
+        type: string
+    required:
+    - expiry
+    type: object
+  controllers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  controllers.ReferralResponse:
+    properties:
+      expiry:
+        type: string
+      referral_code:
+        type: string
+    type: object
+  controllers.ReferralsResponse:
+    properties:
+      referrals:
+        items:
+          $ref: '#/definitions/models.Referral'
+        type: array
+    type: object
+  controllers.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  controllers.RegisterWithReferralRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      referral_code:
+        type: string
+    required:
+    - email
+    - password
+    - referral_code
+    type: object
+  controllers.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request parameters
+        type: string
+    type: object
+  models.Referral:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      referred_by:
+        type: integer
+      referred_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.SuccessResponse:
+    properties:
+      message:
+        example: Referral code deleted
+        type: string
+      referral_code:
+        example: ABC123XYZ
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      referral_code:
+        type: string
+      referral_expiry:
+        type: string
+      referrals:
+        items:
+          $ref: '#/definitions/models.Referral'
+        type: array
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: API для управления реферальной системой
+  title: Реферальная система API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.TokenResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Login user
+      tags:
+      - auth
+  /referral_code:
+    delete:
+      description: Delete the user's existing referral code
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete referral code
+      tags:
+      - referral
+    get:
+      description: Retrieve a user's referral code using their email
+      parameters:
+      - description: User Email
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ReferralResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get referral code by email
+      tags:
+      - referral
+    post:
+      consumes:
+      - application/json
+      description: Create a new referral code with expiry date
+      parameters:
+      - description: Referral Code Creation
+        in: body
+        name: referral
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CreateReferralRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ReferralResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create referral code
+      tags:
+      - referral
+  /referrals:
+    get:
+      description: Retrieve a list of users referred by the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ReferralsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user referrals
+      tags:
+      - referral
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with email and password
+      parameters:
+      - description: Register User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - auth
+  /register_with_referral:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user using a referral code
+      parameters:
+      - description: Register with Referral
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.RegisterWithReferralRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Register with referral code
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
