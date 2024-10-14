@@ -1,4 +1,3 @@
-// config/config.go
 package config
 
 import (
@@ -8,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Config содержит все конфигурационные параметры приложения
 type Config struct {
 	DBHost     string
 	DBPort     string
@@ -18,7 +16,6 @@ type Config struct {
 	JWTSecret  string
 }
 
-// LoadConfig загружает конфигурацию из файла .env или переменных окружения
 func LoadConfig() *Config {
 	err := godotenv.Load()
 	if err != nil {
@@ -35,7 +32,6 @@ func LoadConfig() *Config {
 	}
 }
 
-// getEnv получает переменную окружения или возвращает значение по умолчанию
 func getEnv(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value

@@ -1,4 +1,3 @@
-// internal/controllers/user_controller.go
 package controllers
 
 import (
@@ -10,52 +9,43 @@ import (
 	"github.com/serlenario/referral-system/internal/services"
 )
 
-// UserController отвечает за обработку пользовательских запросов
 type UserController struct {
 	UserService services.UserService
 }
 
-// NewUserController создаёт новый экземпляр UserController
 func NewUserController(userService services.UserService) *UserController {
 	return &UserController{UserService: userService}
 }
 
-// RegisterRequest представляет структуру запроса для регистрации
 type RegisterRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 }
 
-// LoginRequest представляет структуру запроса для аутентификации
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
-// TokenResponse представляет структуру ответа с JWT-токеном
 type TokenResponse struct {
 	Token string `json:"token"`
 }
 
-// CreateReferralRequest представляет структуру запроса для создания реферального кода
 type CreateReferralRequest struct {
 	Expiry time.Time `json:"expiry" binding:"required"`
 }
 
-// ReferralResponse представляет структуру ответа с реферальным кодом
 type ReferralResponse struct {
 	ReferralCode string    `json:"referral_code"`
 	Expiry       time.Time `json:"expiry"`
 }
 
-// RegisterWithReferralRequest представляет структуру запроса для регистрации с реферальным кодом
 type RegisterWithReferralRequest struct {
 	ReferralCode string `json:"referral_code" binding:"required"`
 	Email        string `json:"email" binding:"required,email"`
 	Password     string `json:"password" binding:"required,min=6"`
 }
 
-// ReferralsResponse представляет структуру ответа со списком рефералов
 type ReferralsResponse struct {
 	Referrals []models.Referral `json:"referrals"`
 }

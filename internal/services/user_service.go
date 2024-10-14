@@ -1,4 +1,3 @@
-// services/user_service.go
 package services
 
 import (
@@ -12,7 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UserService определяет методы для управления пользователями и рефералами
 type UserService interface {
 	Register(email, password string) (*models.User, error)
 	Authenticate(email, password string) (string, error)
@@ -23,14 +21,12 @@ type UserService interface {
 	GetReferrals(userID uint) ([]models.Referral, error)
 }
 
-// userService реализует интерфейс UserService
 type userService struct {
 	userRepo     repositories.UserRepository
 	referralRepo repositories.ReferralRepository
 	jwtSecret    string
 }
 
-// NewUserService создаёт новый экземпляр userService
 func NewUserService(userRepo repositories.UserRepository, referralRepo repositories.ReferralRepository, jwtSecret string) UserService {
 	return &userService{
 		userRepo:     userRepo,
@@ -39,7 +35,6 @@ func NewUserService(userRepo repositories.UserRepository, referralRepo repositor
 	}
 }
 
-// Register регистрирует нового пользователя
 func (s *userService) Register(email, password string) (*models.User, error) {
 	existingUser, _ := s.userRepo.GetByEmail(email)
 	if existingUser != nil {
@@ -59,7 +54,6 @@ func (s *userService) Register(email, password string) (*models.User, error) {
 	return user, s.userRepo.Create(user)
 }
 
-// Authenticate аутентифицирует пользователя и возвращает JWT-токен
 func (s *userService) Authenticate(email, password string) (string, error) {
 	user, err := s.userRepo.GetByEmail(email)
 	if err != nil {
@@ -70,7 +64,6 @@ func (s *userService) Authenticate(email, password string) (string, error) {
 		return "", errors.New("invalid credentials")
 	}
 
-	// Генерация JWT
 	token, err := utils.GenerateJWT(user.ID, s.jwtSecret)
 	if err != nil {
 		return "", err
@@ -79,24 +72,20 @@ func (s *userService) Authenticate(email, password string) (string, error) {
 	return token, nil
 }
 
-// CreateReferralCode создаёт новый реферальный код для пользователя
 func (s *userService) CreateReferralCode(userID uint, expiry time.Time) (*models.User, error) {
 	user, err := s.userRepo.GetByID(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Генерация уникального реферального кода
 	referralCode := uuid.New().String()
 
-	// Установка реферального кода и срока его действия
 	user.ReferralCode = referralCode
 	user.ReferralExpiry = expiry
 
 	return user, s.userRepo.Update(user)
 }
 
-// DeleteReferralCode удаляет существующий реферальный код пользователя
 func (s *userService) DeleteReferralCode(userID uint) (*models.User, error) {
 	user, err := s.userRepo.GetByID(userID)
 	if err != nil {
@@ -109,7 +98,6 @@ func (s *userService) DeleteReferralCode(userID uint) (*models.User, error) {
 	return user, s.userRepo.Update(user)
 }
 
-// GetReferralCodeByEmail получает реферальный код пользователя по email
 func (s *userService) GetReferralCodeByEmail(email string) (string, error) {
 	user, err := s.userRepo.GetByEmail(email)
 	if err != nil {
@@ -127,7 +115,6 @@ func (s *userService) GetReferralCodeByEmail(email string) (string, error) {
 	return user.ReferralCode, nil
 }
 
-// RegisterWithReferral регистрирует нового пользователя с использованием реферального кода
 func (s *userService) RegisterWithReferral(referralCode, email, password string) (*models.User, error) {
 	referrer, err := s.userRepo.GetByReferralCode(referralCode)
 	if err != nil {
@@ -151,7 +138,6 @@ func (s *userService) RegisterWithReferral(referralCode, email, password string)
 	return newUser, nil
 }
 
-// GetReferrals получает список рефералов пользователя
 func (s *userService) GetReferrals(userID uint) ([]models.Referral, error) {
 	referrals, err := s.referralRepo.GetByReferrerID(userID)
 	if err != nil {

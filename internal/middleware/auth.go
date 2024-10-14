@@ -1,4 +1,3 @@
-// middleware/auth.go
 package middleware
 
 import (
@@ -9,7 +8,6 @@ import (
 	"github.com/serlenario/referral-system/internal/utils"
 )
 
-// JWTMiddleware проверяет JWT-токен в заголовке Authorization
 func JWTMiddleware(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -31,7 +29,6 @@ func JWTMiddleware(secret string) gin.HandlerFunc {
 			return
 		}
 
-		// Устанавливаем UserID в контекст запроса
 		c.Set("userID", claims.UserID)
 		c.Next()
 	}
